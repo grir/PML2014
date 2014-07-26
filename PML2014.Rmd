@@ -5,12 +5,19 @@ date: "2014.07.25"
 output: html_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
+Load and clear training data:
 ```{r}
-summary(cars)
+library(caret)
+myData <- read.csv("pml-training.csv", na.strings=c("NA","NULL","#DIV/0!"))
+
+#Choose appropriated columns:
+clearData <- myData[,colSums(is.na(myData))==0]
+
+inTrain <- createDataPartition(y=clearData$classe,
+                              p=0.7, list=FALSE)
+training <- clearData[inTrain,]
+testingInner <- [-inTrain,]
+
 ```
 
 You can also embed plots, for example:
