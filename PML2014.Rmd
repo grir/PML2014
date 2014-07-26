@@ -7,23 +7,31 @@ output: html_document
 
 Load and clear training data:
 ```{r}
+rm(list=ls())
 library(caret)
+set.seed(1234)
 myData <- read.csv("pml-training.csv", na.strings=c("NA","NULL","#DIV/0!"))
 
 #Choose appropriated columns:
 clearData <- myData[,colSums(is.na(myData))==0]
 
 inTrain <- createDataPartition(y=clearData$classe,
-                              p=0.7, list=FALSE)
-training <- clearData[inTrain,]
-testingInner <- [-inTrain,]
+                              p=0.08, list=FALSE)
+training <- clearData[inTrain,-c(1:6,9:32,34:58)]
+testingInner <- clearData[-inTrain,]
 
 ```
+##Apply the random forests method:
+```{r}
 
-You can also embed plots, for example:
+modelFit <- train(classe~ ., data=training, method="rf", prox=TRUE)
+modelFit
 
-```{r, echo=FALSE}
-plot(cars)
+pred <- predict(modelFit,testingInner)
+testingInner$predRight <- pred==testingInner$classe
+table(pred,testingInner$classe)
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
