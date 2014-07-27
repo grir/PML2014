@@ -9,27 +9,44 @@ Load and clear training data:
 ```{r}
 rm(list=ls())
 library(caret)
-set.seed(1234)
+set.seed(1341)
 myData <- read.csv("pml-training.csv", na.strings=c("NA","NULL","#DIV/0!"))
 
 #Choose appropriated columns:
 clearData <- myData[,colSums(is.na(myData))==0]
 
-inTrain <- createDataPartition(y=clearData$classe,
+myTest <- read.csv("pml-testing.csv")
+ colnames(myTest)[ncol(myTest)] <- 'classe'
+ myTest$classe <- NA
+ testingOuter <- myTest
+
+
+for(i in 1:30){
+ inTrain <- createDataPartition(y=clearData$classe,
                               p=0.08, list=FALSE)
-training <- clearData[inTrain,-c(1:6,9:32,34:58)]
-testingInner <- clearData[-inTrain,]
+ training <- clearData[inTrain,-c(1:6)]
+ testingInner <- clearData[-inTrain,]
 
-```
+ 
+
+
+
+
 ##Apply the random forests method:
-```{r}
 
-modelFit <- train(classe~ ., data=training, method="rf", prox=TRUE)
-modelFit
 
-pred <- predict(modelFit,testingInner)
-testingInner$predRight <- pred==testingInner$classe
-table(pred,testingInner$classe)
+ modelFit <- train(classe~ ., data=training, method="rf", prox=TRUE)
+#modelFit
+
+#pred1 <- predict(modelFit,testingInner)
+#testingInner$predRight <- pred1==testingInner$classe
+#table(pred1,testingInner$classe)
+
+ pred2 <- predict(modelFit,testingOuter)
+#testingInner$predRight <- pred2==testingOuter$classe
+#table(pred1,testingOuter$classe)
+ print(pred2)
+}
 
 ```
 
