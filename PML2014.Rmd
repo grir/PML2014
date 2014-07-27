@@ -4,7 +4,7 @@ author: "Irus"
 date: "2014.07.25"
 output: html_document
 ---
-In the code below, we present simple classification algorithm based on the random forests method. The main idea follows from the heuristicall observation that there enough to choose   only about (trainingProb) 8% of all samples from given training data to  predict with an estimated accuracy about 98%. We run  prediction for 30 (nTrials) times and remember predicted values ("answersM"):
+In the code below, we present simple classification algorithm based on the random forests method. The main idea follows from the heuristic observation that there enough to choose   only about (trainingProb) 8% of all samples from given training data to  predict with an estimated accuracy about 98%. We run  prediction for 30 (nTrials) times and remember predicted values ("answersM"):
 
 + [1]  A A C ... B
 + [2]  B A C ... B
