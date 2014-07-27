@@ -1,54 +1,74 @@
 ---
 title: "PML2014"
-author: "Irus Grinis"
+author: "Irus"
 date: "2014.07.25"
 output: html_document
 ---
+In the code below, we present simple classification algorithm based on the random forests method. The main idea follows from the heuristicall observation that there enough to choose   only about (trainingProb) 8% of all samples from given training data to  predict with an estimated accuracy about 98%. We run  prediction for 30 (nTrials) times and remember predicted values ("answersM"):
 
-Load and clear training data:
++ [1]  A A C ... B
++ [2]  B A C ... B
++ ...
++ [30] B A C ... B
+ 
+We use the most frequent values from each column to achieve predicted values  with high accuracy. 
+
 ```{r}
-rm(list=ls())
-library(caret)
-set.seed(1341)
-myData <- read.csv("pml-training.csv", na.strings=c("NA","NULL","#DIV/0!"))
+ rm(list=ls())
+ library(caret)
+ set.seed(1341)
+ 
+ 
+ 
+#Read the "pml-training.csv" file
+ myData <- read.csv("pml-training.csv", na.strings=c("NA","NULL","#DIV/0!"))
 
-#Choose appropriated columns:
-clearData <- myData[,colSums(is.na(myData))==0]
+#Choose appropriate columns:
+ clearData <- myData[,colSums(is.na(myData))==0]
 
-myTest <- read.csv("pml-testing.csv")
+#Read the "pml-testing.csv" file:
+
+ myTest <- read.csv("pml-testing.csv")
  colnames(myTest)[ncol(myTest)] <- 'classe'
  myTest$classe <- NA
  testingOuter <- myTest
+#Set the algorithm parameters: 
+ nTrials <- 30        # Number of trials
 
-
-for(i in 1:30){
- inTrain <- createDataPartition(y=clearData$classe,
-                              p=0.08, list=FALSE)
- training <- clearData[inTrain,-c(1:6)]
- testingInner <- clearData[-inTrain,]
-
- 
-
-
-
+ answers <- c()
+ trainingProb <- 0.08 # heuristically found probability  
+for(i in 1:nTrials){
+   inTrain <- createDataPartition(y=clearData$classe,
+                              p=trainingProb, list=FALSE)
+   training <- clearData[inTrain,-c(1:6)]
+   testingInner <- clearData[-inTrain,]
 
 ##Apply the random forests method:
 
 
- modelFit <- train(classe~ ., data=training, method="rf", prox=TRUE)
-#modelFit
+   modelFit <- train(classe~ ., data=training, method="rf", prox=TRUE)
+ #modelFit
 
-#pred1 <- predict(modelFit,testingInner)
-#testingInner$predRight <- pred1==testingInner$classe
-#table(pred1,testingInner$classe)
+ #Unused code (was usefull for heuristical experiments :) 
+ #pred1 <- predict(modelFit,testingInner)
+ #testingInner$predRight <- pred1==testingInner$classe
+ #table(pred1,testingInner$classe)
 
- pred2 <- predict(modelFit,testingOuter)
-#testingInner$predRight <- pred2==testingOuter$classe
-#table(pred1,testingOuter$classe)
- print(pred2)
+   pred2 <- predict(modelFit,testingOuter)
+   answers <-  c(answers,as.character(pred2))
 }
+
+#Use most frequently answers from data frame "answers" as TRUE answers:
+ answersM <- matrix(data=answers, nrow=nTrials, byrow=TRUE, ncol=20)
+ 
+ trueAnswers <-apply(answersM,2,function(x) names(which.max(table(x)))) 
+
+ n <- length(trueAnswers)
+ for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(trueAnswers[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
